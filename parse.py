@@ -98,5 +98,5 @@ def parse(hdr):
 	return env
 
 if __name__=="__main__":
-	parsed_prog = parse(sys.argv[1])
-	pprint(parsed_prog)
+	env = parse(sys.argv[1])
+	pprint(env)
