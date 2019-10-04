@@ -20,7 +20,7 @@ delta = {
 }
 
 
-def interp_blk(blk, env):
+def parse_blk(blk, env):
 	ret = {}
 	for b in blk.split(";"):
 		clean_b = b.replace("\n", "").replace("\t", "")
@@ -48,7 +48,7 @@ def interp_blk(blk, env):
 	return Struct(**ret)
 
 
-def interp_typdef(stack):
+def parse_typdef(stack):
 	if len(stack) != 2: raise Exception("Stack is not as expected: {}".format(stack))
 	ret = None
 	typdef, struct = stack
@@ -66,7 +66,7 @@ def interp_typdef(stack):
 	return ret
 
 
-def interp(hdr):
+def parse(hdr):
 	stack = [""]
 	frame = 0
 	env = {}
@@ -81,14 +81,14 @@ def interp(hdr):
 			elif c == "}":
 				if frame == -1: raise Exception("Stack frame has gone negative, did you have too many closing braces?")
 
-				ret_blk = interp_blk(stack[frame], env)
+				ret_blk = parse_blk(stack[frame], env)
 				print("Received blk: {}".format(ret_blk))
 				stack[frame] = ret_blk
 				frame -= 1
 				continue
 
 			elif frame == 0 and c == ";":
-				ret_td = interp_typdef(stack)
+				ret_td = parse_typdef(stack)
 				print("Returned typedef, Global Env: {}".format((ret_td, env)))
 				env.update(ret_td)
 				stack = [""]
