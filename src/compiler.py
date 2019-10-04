@@ -1,4 +1,5 @@
 import re
+from collections import OrderedDict
 
 from debug_utils import *
 
@@ -19,9 +20,10 @@ delta = {
 	}
 }
 
-def compile_struct(**fields):
+def compile_struct(fields):
 	ret = []
-	for k, v in fields.items():
+	for k in fields:
+		v = fields[k]
 		log("Compiling: {}".format((k,v)))
 		ret += ['"{}" / {}'.format(k,v)]
 	ret = ",\n".join(ret)
@@ -30,7 +32,7 @@ def compile_struct(**fields):
 	return ret
 
 def compile_blk(blk, env):
-	ret = {}
+	ret = OrderedDict()
 	for b in blk.split(";"):
 		clean_b = b.replace("\n", "").replace("\t", "")
 		log("Block: {}".format(clean_b))
@@ -54,7 +56,7 @@ def compile_blk(blk, env):
 			log("User type: {}".format((typ, name)))
 
 	log("Returning block: {}".format(pformat(ret)))
-	return compile_struct(**ret)
+	return compile_struct(ret)
 
 
 def compile_typdef(stack):

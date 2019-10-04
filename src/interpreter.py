@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from pprint import pformat
 from construct import *
 import re
@@ -31,7 +32,7 @@ delta = {
 
 
 def interp_blk(blk, env):
-	ret = {}
+	ret = OrderedDict()
 	for b in blk.split(";"):
 		clean_b = b.replace("\n", "").replace("\t", "")
 		log("Block: {}".format(clean_b))

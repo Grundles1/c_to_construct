@@ -1,6 +1,6 @@
 from pprint import pprint, pformat
 
-debug = False
+debug = True
 
 def log(msg):
 	if debug: print(msg)
