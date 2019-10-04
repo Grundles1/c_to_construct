@@ -1,5 +1,5 @@
+from pprint import pformat
 from construct import *
-import sys
 import re
 
 delta = {
