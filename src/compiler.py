@@ -1,30 +1,39 @@
-from construct import *
-import sys
 import re
+
+from debug_utils import *
 
 delta = {
 	"signed" : {
-		"int" : Int32ub,
-		"short" : Int16ub,
-		"char" : Int8ub,
-		"float" : Float32b,
-		"double" : Float64b,
+		"int" : "Int32ub",
+		"short" : "Int16ub",
+		"char" : "Int8ub",
+		"float" : "Float32b",
+		"double" : "Float64b",
 	},
 	"unsigned": {
-		"int" : Int32sb,
-		"short" : Int16sb,
-		"char" : Int8sb,
-		"float" : Float32b,
-		"double" : Float64b,
+		"int" : "Int32sb",
+		"short" : "Int16sb",
+		"char" : "Int8sb",
+		"float" : "Float32b",
+		"double" : "Float64b",
 	}
 }
 
+def compile_struct(**fields):
+	ret = []
+	for k, v in fields.items():
+		log("Compiling: {}".format((k,v)))
+		ret += ['"{}" / {}'.format(k,v)]
+	ret = ",\n".join(ret)
+	ret = indent(ret)
+	ret = "Struct(\n{}{}\n)".format(INDENT, ret)
+	return ret
 
-def parse_blk(blk, env):
+def compile_blk(blk, env):
 	ret = {}
 	for b in blk.split(";"):
 		clean_b = b.replace("\n", "").replace("\t", "")
-		print("Block: {}".format(clean_b))
+		log("Block: {}".format(clean_b))
 
 		if re.match("(int|short|char|float|double) (.*)", clean_b):
 			sign = None
@@ -42,31 +51,31 @@ def parse_blk(blk, env):
 			typ, name = obj.groups()
 			if typ in env: ret[name] = env[typ]
 			else: raise Exception("Unrecognized user type: {}".format(clean_b, typ, name, env))
-			print("User type: {}".format((typ, name)))
+			log("User type: {}".format((typ, name)))
 
-	print("Returning block: {}".format(pformat(ret)))
-	return Struct(**ret)
+	log("Returning block: {}".format(pformat(ret)))
+	return compile_struct(**ret)
 
 
-def parse_typdef(stack):
+def compile_typdef(stack):
 	if len(stack) != 2: raise Exception("Stack is not as expected: {}".format(stack))
 	ret = None
 	typdef, struct = stack
 
 	clean_typdef = typdef.replace("\n","")
-	print("typedef, struct: {}".format((clean_typdef, struct)))
+	log("typedef, struct: {}".format((clean_typdef, struct)))
 
 	if re.match("typedef.*struct\s+(\w+)\s*", clean_typdef):
 		name = re.match("typedef.*struct\s+(\w+)\s*", clean_typdef).group(1)
-		ret = { name:struct }
+		ret = { name : indent(struct) }
 
 	else:
-		print("Typedef not recognized: {}".format(stack))
-	print("Returning typedef: {}".format(ret))
+		log("Typedef not recognized: {}".format(stack))
+	log("Returning typedef: {}".format(ret))
 	return ret
 
 
-def parse(hdr):
+def compile(hdr):
 	stack = [""]
 	frame = 0
 	env = {}
@@ -81,18 +90,18 @@ def parse(hdr):
 			elif c == "}":
 				if frame == -1: raise Exception("Stack frame has gone negative, did you have too many closing braces?")
 
-				ret_blk = parse_blk(stack[frame], env)
-				print("Received blk: {}".format(ret_blk))
+				ret_blk = compile_blk(stack[frame], env)
+				log("Received blk: {}".format(ret_blk))
 				stack[frame] = ret_blk
 				frame -= 1
 				continue
 
 			elif frame == 0 and c == ";":
-				ret_td = parse_typdef(stack)
-				print("Returned typedef, Global Env: {}".format((ret_td, env)))
+				ret_td = compile_typdef(stack)
+				log("Returned typedef, Global Env: {}".format((ret_td, env)))
 				env.update(ret_td)
 				stack = [""]
-				print("Updated env: {}".format(env))
+				log("Updated env: {}".format(env))
 				continue
 
 			stack[frame] += c

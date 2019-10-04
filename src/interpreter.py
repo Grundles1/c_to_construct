@@ -2,6 +2,16 @@ from pprint import pformat
 from construct import *
 import re
 
+debug = False
+
+def log(msg):
+	global debug
+	if debug: print(msg)
+
+def plog(msg):
+	global debug
+	if debug: print(msg)
+
 delta = {
 	"signed" : {
 		"int" : Int32ub,
@@ -24,7 +34,7 @@ def interp_blk(blk, env):
 	ret = {}
 	for b in blk.split(";"):
 		clean_b = b.replace("\n", "").replace("\t", "")
-		print("Block: {}".format(clean_b))
+		log("Block: {}".format(clean_b))
 
 		if re.match("(int|short|char|float|double) (.*)", clean_b):
 			sign = None
@@ -42,9 +52,9 @@ def interp_blk(blk, env):
 			typ, name = obj.groups()
 			if typ in env: ret[name] = env[typ]
 			else: raise Exception("Unrecognized user type: {}".format(clean_b, typ, name, env))
-			print("User type: {}".format((typ, name)))
+			log("User type: {}".format((typ, name)))
 
-	print("Returning block: {}".format(pformat(ret)))
+	log("Returning block: {}".format(pformat(ret)))
 	return Struct(**ret)
 
 
@@ -54,15 +64,15 @@ def interp_typdef(stack):
 	typdef, struct = stack
 
 	clean_typdef = typdef.replace("\n","")
-	print("typedef, struct: {}".format((clean_typdef, struct)))
+	log("typedef, struct: {}".format((clean_typdef, struct)))
 
 	if re.match("typedef.*struct\s+(\w+)\s*", clean_typdef):
 		name = re.match("typedef.*struct\s+(\w+)\s*", clean_typdef).group(1)
 		ret = { name:struct }
 
 	else:
-		print("Typedef not recognized: {}".format(stack))
-	print("Returning typedef: {}".format(ret))
+		log("Typedef not recognized: {}".format(stack))
+	log("Returning typedef: {}".format(ret))
 	return ret
 
 
@@ -82,17 +92,17 @@ def interp(hdr):
 				if frame == -1: raise Exception("Stack frame has gone negative, did you have too many closing braces?")
 
 				ret_blk = interp_blk(stack[frame], env)
-				print("Received blk: {}".format(ret_blk))
+				log("Received blk: {}".format(ret_blk))
 				stack[frame] = ret_blk
 				frame -= 1
 				continue
 
 			elif frame == 0 and c == ";":
 				ret_td = interp_typdef(stack)
-				print("Returned typedef, Global Env: {}".format((ret_td, env)))
+				log("Returned typedef, Global Env: {}".format((ret_td, env)))
 				env.update(ret_td)
 				stack = [""]
-				print("Updated env: {}".format(env))
+				log("Updated env: {}".format(env))
 				continue
 
 			stack[frame] += c
