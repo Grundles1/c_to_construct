@@ -7,7 +7,7 @@ typedef struct
 	float b;
 	int c;
 	int d;
-} my_int;
+} my_int_t;
 
 typedef struct 
 {
@@ -18,4 +18,5 @@ typedef struct
 	float b;
 	int c;
 	int d;
-} my_other_int;
+	my_int_t my_int;
+} my_other_int_t;

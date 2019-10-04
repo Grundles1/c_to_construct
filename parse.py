@@ -21,7 +21,8 @@ delta = {
 		"double" : Float64b,
 	}
 }
-def parse_blk(blk):
+
+def parse_blk(blk, env):
 	ret = {}
 	for b in blk.split(";"):
 		clean_b = b.replace("\n", "").replace("\t", "")
@@ -30,6 +31,7 @@ def parse_blk(blk):
 		if re.match("(int|short|char|float|double) (.*)", clean_b):
 			sign = None
 			groups = re.match("(int|short|char|float|double)\s+(.*)", clean_b).groups()
+			
 			if len(groups) == 3: sign, typ, name = groups
 			elif len(groups) == 2: typ, name = groups
 			else: raise Exception("Unrecognized token: {}".format(clean_b))
@@ -37,9 +39,13 @@ def parse_blk(blk):
 			if sign: ret[name] = delta[sign][typ]
 			else: ret[name] = delta["signed"][typ] 
 	
-		elif re.match("short (.*)", clean_b):
-			name = re.match("int (.*)", clean_b).group(1)
-			ret[name] = Int32ub 
+		elif re.match("(\w+)\s+(\w+)", clean_b):
+			obj = re.match("(\w+)\s+(\w+)", clean_b)
+			typ, name = obj.groups()
+			if typ in env: ret[name] = env[typ]
+			else: raise Exception("Unrecognized user type: {}".format(clean_b, typ, name, env))
+			print("User type: {}".format((typ, name)))
+
 	print("Returning block: {}".format(pformat(ret)))
 	return Struct(**ret)
 
@@ -63,7 +69,7 @@ def parse_typdef(stack):
 def parse(hdr):
 	stack = [""]
 	frame = 0
-	ret = {}
+	env = {}
 	with open(hdr) as f:
 		for c in f.read():
 			if c == "{":
@@ -74,7 +80,7 @@ def parse(hdr):
 			elif c == "}":
 				if frame == -1: raise Exception("Stack frame has gone negative, did you have too many closing braces?")
 
-				ret_blk = parse_blk(stack[frame])
+				ret_blk = parse_blk(stack[frame], env)
 				print("Received blk: {}".format(ret_blk))
 				stack[frame] = ret_blk
 				frame -= 1
@@ -82,13 +88,14 @@ def parse(hdr):
 
 			elif frame == 0 and c == ";":
 				ret_td = parse_typdef(stack)
-				print("Returned typedef, Global Env: {}".format((ret_td, ret)))
-				ret.update(ret_td)
+				print("Returned typedef, Global Env: {}".format((ret_td, env)))
+				env.update(ret_td)
 				stack = [""]
-				print("Updated env: {}".format(ret))
+				print("Updated env: {}".format(env))
 				continue
+
 			stack[frame] += c
-	return ret
+	return env
 
 if __name__=="__main__":
 	parsed_prog = parse(sys.argv[1])
