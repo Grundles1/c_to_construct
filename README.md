@@ -2,7 +2,7 @@
 
 # interpreter
 
-This is a compiler between C typedefs and and Python Construct library structs.  Given a header file, it can be interpreteted to produce a python dictionary from name of structs to Construct structs.  Running this interpreter directly will cause the program to attempt to analyze the structs in the header and then print out what a random structure (all fields are randomly generated) would look like
+This is an interpreter between C typedefs and and Python Construct library structs.  Given a header file, it can be interpreteted to produce a python dictionary from name of structs to Construct structs.  Running this interpreter directly will cause the program to attempt to analyze the structs in the header and then print out what a random structure (all fields are randomly generated) would look like
   
 `python cconst.py test.h`  or `./cconst.py test.h` (if you make the exe executable)  
   
