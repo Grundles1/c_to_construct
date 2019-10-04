@@ -32,7 +32,7 @@ will yield:
   
 ```
 # The python file for construct objects, compiled from test.h
-# Compiled at 2019-10-03T23:08:12.125523
+# Compiled at 2019-10-03T23:21:26.873841
 # Compiled by Jesse
 
 from construct import *
@@ -44,25 +44,15 @@ my_int_t = Struct(
     "d" / Int32ub,
     "y" / Int8ub,
     "x" / Int32ub,
-    "z" / Int16ub
-  )
+    "z" / Int16ub)
 
 my_other_int_t = Struct(
     "a" / Float64b,
     "c" / Int32ub,
     "b" / Float32b,
     "d" / Int32ub,
-    "my_int" / Struct(
-        "a" / Float64b,
-        "c" / Int32ub,
-        "b" / Float32b,
-        "d" / Int32ub,
-        "y" / Int8ub,
-        "x" / Int32ub,
-        "z" / Int16ub
-      ),
+    "my_int" / my_int_t,
     "y" / Int8ub,
     "x" / Int32ub,
-    "z" / Int16ub
-  )
+    "z" / Int16ub)
 ```
