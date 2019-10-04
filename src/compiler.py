@@ -26,7 +26,7 @@ def compile_struct(**fields):
 		ret += ['"{}" / {}'.format(k,v)]
 	ret = ",\n".join(ret)
 	ret = indent(ret)
-	ret = "Struct(\n{}{}\n)".format(INDENT, ret)
+	ret = "Struct(\n{}{})".format(INDENT, ret)
 	return ret
 
 def compile_blk(blk, env):
@@ -49,7 +49,7 @@ def compile_blk(blk, env):
 		elif re.match("(\w+)\s+(\w+)", clean_b):
 			obj = re.match("(\w+)\s+(\w+)", clean_b)
 			typ, name = obj.groups()
-			if typ in env: ret[name] = env[typ]
+			if typ in env: ret[name] = typ
 			else: raise Exception("Unrecognized user type: {}".format(clean_b, typ, name, env))
 			log("User type: {}".format((typ, name)))
 
