@@ -22,3 +22,4 @@ print(repr(rand_a_bits))
 print("Using a to parse the random string")
 parsed_a = a.parse(rand_a_bits)
 print(parsed_a)
+
